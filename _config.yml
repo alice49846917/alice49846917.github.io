@@ -99,7 +99,7 @@ theme: butterfly
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: 'git'
-  repo: 'https://github.com/dj49846917/dj49846917.github.io.git'
+  repo: 'https://github.com/alice49846917/dj49846917.github.io.git'
   branch: master
 
 # aplayer 音乐插件
