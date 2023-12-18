@@ -377,6 +377,9 @@ cover: https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=955487690,34581
 # https怎么加密的？(加密流程)，如何通过公钥和私钥加密？
 ---
 
+# https加密解密过程涉及的算法，这些算法的区别
+---
+
 # HTTPS认证是怎么认证的？
   * 客户端和服务端进行数据传输之前，先通过证书对双方进行身份验证：
     1. 客户端在发送SSL握手信息给服务端要求连接
@@ -434,6 +437,9 @@ cover: https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=955487690,34581
 ---
 
 # websocket 为什么要加心跳? websocket 不是长连接吗，为什么还要加心跳去维持连接
+---
+
+# 心跳监听机制
 ---
 
 # websocket 连接成功的状态码是多少

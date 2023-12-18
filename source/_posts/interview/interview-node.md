@@ -367,3 +367,6 @@ IP是TCP/IP体系中的网络层协议,IP地址是用来识别网络上的设备
 # token存在localstorage里，过期了怎么处理？
   * token一般放到cookie里，后端可以写入cookie,所以让后端去处理，如果后端不处理，当token失效后，前端就跳转到登录页面即可
 ---
+
+# pnpm原理
+---
