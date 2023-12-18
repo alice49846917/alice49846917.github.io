@@ -256,6 +256,32 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
       app.use(router).use(store).use(ElementPlus).mount('#app')
     ```
 
+  3. 按需导入
+    * 首先你需要安装unplugin-vue-components 和 unplugin-auto-import这两款插件
+      ```
+        npm install -D unplugin-vue-components unplugin-auto-import
+      ```
+    * 在vite.config.ts中配置
+      ```
+        import { defineConfig } from 'vite'
+        import AutoImport from 'unplugin-auto-import/vite'
+        import Components from 'unplugin-vue-components/vite'
+        import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
+        export default defineConfig({
+          // ...
+          plugins: [
+            // ...
+            AutoImport({
+              resolvers: [ElementPlusResolver()],
+            }),
+            Components({
+              resolvers: [ElementPlusResolver()],
+            }),
+          ],
+        })
+      ```
+
 {% note danger %}
   注意: 
     vite在打包（也就是执行npm run build）的时候，element-plus会报错，解决办法是修改package.json中的build打包命令：
@@ -469,6 +495,20 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
         const app = createApp(App)
         app.use(router).use(store).use(Vant).mount('#app')
       ```
+
+{% note danger %}
+  注意: 
+    出现以下报错：![报错](/images/vue/报错.png)
+  解决办法：在文件根目录下面的，vite-env.d.ts文件中添加如下代码，即可成功解决该问题。
+    ```
+      declare module "*.vue" {
+        import type { DefineComponent } from "vue";
+        const vueComponent: DefineComponent<{}, {}, any>;
+        export default vueComponent;
+      }
+
+    ```
+{% endnote %}
   
 # vant ui的rem适配
   1. 安装
