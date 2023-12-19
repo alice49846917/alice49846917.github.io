@@ -542,6 +542,19 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
       };
     ```
 
+# 针对设计稿是1920*1080这种自适应的设计稿，可直接封装以下方法
+  ```
+    /** 将px数值转换rem数值 */
+    export function px2rem(px: number) {
+        return px / System.designFontSize;
+    }
+
+    /** 将px单位转换为rem单位 */
+    export function rem(px: number) {
+        return px2rem(px) + "rem";
+    }
+  ```
+
 # 使用vite构建vue项目打包发布gitee pages或者github pages
   1. 由于我使用了vite的多环境，在.env.development和.env.production中分别添加变量VITE_APP_BASE，设置项目基础路径，也就是你要部署github/gitee的仓库名称，我这里的仓库名称是vue3-shopping
     * .env.development
