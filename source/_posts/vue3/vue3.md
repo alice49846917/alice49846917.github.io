@@ -542,17 +542,42 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
       };
     ```
 
-# 针对设计稿是1920*1080这种自适应的设计稿，可直接封装以下方法
+# rem适配pc端方案
+1. 安装 postcss-pxtorem
   ```
-    /** 将px数值转换rem数值 */
-    export function px2rem(px: number) {
-        return px / System.designFontSize;
-    }
+    npm install postcss-pxtorem amfe-flexible -D
+  ```
+2. 配置 vite.config.ts
+  ```
+    import { defineConfig } from 'vite'
+    import postcssPxtoRem from 'postcss-pxtorem'
 
-    /** 将px单位转换为rem单位 */
-    export function rem(px: number) {
-        return px2rem(px) + "rem";
-    }
+    export default defineConfig({
+      css: {
+        postcss: {
+          plugins: [
+            postcssPxtoRem({
+              rootValue: 144, // 按照自己的设计稿修改 1440/10
+              unitPrecision: 5, // 保留到5位小数
+              selectorBlackList: ['ignore', 'tab-bar', 'tab-bar-item'],  // 忽略转换正则匹配项
+              propList: ['*'],
+              replace: true,
+              mediaQuery: false,
+              minPixelValue: 0
+            })  
+          ]
+        }
+      }
+    })
+  ```
+3. 再main.ts文件中引入amfe-flexible
+  ```
+    import 'amfe-flexible'
+  ```
+4. 在样式中直接使用 px 作为单位即可
+5. 如果是行内样式或者js赋值的px这个插件不会转行rem，这个时候需要在赋值的时候/144
+  ```
+    <div :style="{width: 265 / 144 + 'rem', height: 180 / 144 + 'rem'}"></div>
   ```
 
 # 使用vite构建vue项目打包发布gitee pages或者github pages
