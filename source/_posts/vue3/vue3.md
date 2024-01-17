@@ -83,7 +83,32 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
   * 注意：在安装了vant后会报以下错误：
     - ![安装时的报错](/images/vue/installError.jpg)
     - 解决办法：
-      
+
+# 最新vue3项目vite使用
+  1. 安装命令：
+    ```
+      npm create vue@3  可选择vur-router、pinia、eslint
+    ```
+  2. 运行时代码强校验
+    * 安装命令：
+      ```
+        npm install --save-dev vite-plugin-eslint
+      ```
+    * 在.eslintrc.cjs中添加如下代码：(vite-plugin-eslint有报错，但是不影响运行，所以直接注释掉)
+      ```
+        // @ts-ignore
+        import eslintPlugin from 'vite-plugin-eslint'
+
+        export default defineConfig({
+        plugins: [
+          ...
+          eslintPlugin()
+        ],
+        ...
+      })
+      ```
+
+
 # vite的使用
 ## 安装插件
   * npm init vite@latest
