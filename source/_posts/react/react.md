@@ -655,3 +655,95 @@ cover: /images/react/logo.jpg                 # 文章的缩略图（用在首�
 
       export default memo(Child2);
     ```
+
+# 最新vite5搭建React18环境
+## 初始化项目
+  1. 安装命令：
+    ```
+      yarn create vite
+      pnpm create vite
+    ```
+  2. 安装依赖
+    ```
+      pnpm install
+    ```
+## 配置editorConfig(不同ide相同展示)
+> 在webstorm中会自动读取.editorcondig，vscode需要下载插件EditorConfig for VS Code
+  1. 在根路径下创建.editorconfig文件
+     ```
+      # https://editorconfig.org
+      root = true
+
+      # *表示所有的文件都生效
+      [*]
+      charset = utf-8
+      # 空格缩进、每次2格
+      indent_style = tab
+      indent_size = 2
+      # 换行
+      end_of_line = lf
+      insert_final_newline = true
+      trim_trailing_whitespace = true
+
+      [*.md]
+      insert_final_newline = false
+      trim_trailing_whitespace = false
+     ```
+
+## 配置npm/yarn/pnpm镜像
+  1. 必须要有稳定版的nodejs
+  2. 安装cnpm、yarn或者pnpm
+    ```
+      # 安装yarn
+      npm install -g yarn
+      # 安装pnpm
+      npm install -g pnpm
+    ```
+  3. 查看当前镜像源
+    ```
+      npm config get registry
+    ```
+  4. 修改npm配置
+    * 在项目根目录下(package.json同一目录)中新建.npmrc文件，编辑文件内容如下：
+      ```
+        registry=https://registry.npmmirror.com
+      ```
+  5. 修改yarn配置
+    * 在项目根目录下(package.json同一目录)中新建.yarnrc文件，编辑文件内容如下：
+      ```
+        registry "https://registry.npmmirror.com"
+      ```
+  6. 命令行修改配置
+    ```
+      npm config set registry https://registry.npmmirror.com
+      yarn config set registry https://registry.npmmirror.com
+    ```
+  7. pnpm使用命令：
+    ```
+      pnpm install 包名
+
+      pnpm i 包名
+
+      pnpm add 包名 -S   // 默认写入dependencies
+
+      pnpm add 包名 -D   // devDependencies
+
+      pnpm add 包名 -g   // 全局安装
+
+      pnpm remove 包名   // 移除
+      
+      pnpm up           // 更新所有依赖项
+
+      pnpm upgrade 包名  // 更新包
+
+      pnpm upgrade 包名 --global  // 全局更新包
+    ```
+
+## pretter集成(代码格式化)
+> 官网：https://www.prettier.cn/
+
+
+# 通过vscode提交git
+  1. 输入：git init
+  2. 点击vs code放大镜下面的按钮
+    * ![vscode添加git文件](/images/react/vscode的vite配置.png)
