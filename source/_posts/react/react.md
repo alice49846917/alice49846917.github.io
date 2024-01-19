@@ -70,47 +70,43 @@ cover: /images/react/logo.jpg                 # 文章的缩略图（用在首�
 > 重点：使用useRoutes管理路由
   1. 修改src/router/index.tsx
     ```
-      import { lazy, ReactNode, Suspense } from 'react';
-      import { RouteObject } from 'react-router-dom';
-      import Layout from '../layout';
-      const Category = lazy(() => import('../views/Category'));
-      const Home = lazy(() => import('../views/Home'));
-      const Login = lazy(() => import('../views/Login'));
-      const Cat = lazy(() => import('../views/Cat'));
-
-      const lazyload = (children: ReactNode): ReactNode => {
-        return (
-          <Suspense fallback={<>loading</>}>
-            {children}
-          </Suspense>
-        )
-      }
-      const RouterConfig: RouteObject[] = [
+      import { createBrowserRouter, Navigate } from "react-router-dom";
+      import Home from "../view/Home.tsx";
+      import Main from "../view/Main.tsx";
+      import Layout from "../layout/Layout.tsx";
+      import { lazy, Suspense } from "react";
+      const V1 = lazy(() => import("@/view/Dashboard")); // 懒加载
+      const router = [
         {
-          path: '/',
+          path: "/",
           element: <Layout />,
           children: [
             {
-              index: true,
-              element: lazyload(<Home />)
+              path: "/",
+              element: <Navigate to={"/dashboard"} />,
             },
             {
-              path: '/category',
-              element: lazyload(<Category />)
+              path: "/dashboard",
+              element: (
+                <Suspense>
+                  <V1 />
+                </Suspense>
+              ),
             },
-            {
-              path: '/cat',
-              element: lazyload(<Cat />)
-            }
           ],
         },
         {
-          path: '/login',
-          element: lazyload(<Login />)
+          path: "/home",
+          element: <Home />,
         },
-      ]
+        {
+          path: "/*",
+          element: <Main />,
+        },
+      ];
 
-      export default RouterConfig
+      export default createBrowserRouter(router);
+
     ```
   2. 修改app.tsx
     ```
