@@ -741,7 +741,158 @@ cover: /images/react/logo.jpg                 # 文章的缩略图（用在首�
 
 ## pretter集成(代码格式化)
 > 官网：https://www.prettier.cn/
+  1. 安装：
+    ```
+      pnpm add prettier -D 或
+      yarn add prettier -D
+    ```
+  2. 在项目根目录下(package.json同一目录)中新建prettierrc.cjs文件，编辑文件内容如下：
+    ```
+      module.exports = {
+        // 每行最大列，超过换行
+        printWidth: 120,
+        // 使用制表符而不是空格缩进
+        useTabs: false,
+        // 缩进
+        tabWidth: 2,
+        // 结尾不用分号
+        semi: false,
+        // 使用单引号
+        singleQuote: true,
+        // 在jsx中使用单引号而不是双引号
+        jsxSingleQuote: true,
+        // 箭头函数里面，如果是一个参数的时候，去掉括号
+        arrowParens: 'avoid',
+        // 对象、数组括号与文字间添加空格
+        bracketSpacing: true,
+        // 尾随逗号
+        trailingComma: 'none'
+      }
+    ```
+  3. 自动格式化
+    * 在vscode搜索安装prettier插件`Prettier - Code formatter`
+    * 在项目根目录下(package.json同一目录)中新建.vscode文件夹，再新建settings.json,编辑文件内容如下：(代码保存是会自动格式化代码)
+      ```
+        {
+          // 保存自动格式化代码
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          // 开启stylelint自动修复
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true
+          }
+        }
+      ```
 
+## vite配置
+> 在vite.config.ts中配置如下：
+  ```
+    import { defineConfig } from "vite";
+    import react from "@vitejs/plugin-react";
+    import path from "path";
+
+    // https://vitejs.dev/config/
+    export default defineConfig({
+      plugins: [react()],
+      resolve: {
+        alias: {
+          "@": path.resolve(__dirname, "./src"),
+        },
+      },
+      server: {
+        host: "localhost",
+        port: 8000,
+        proxy: {
+          "/api": "http://api-driver.marsview.cc",
+        },
+      },
+    });
+  ```
+
+## 集成react-router6.x
+  1. 安装：
+    ```
+      yarn add react-router-dom 或
+      pnpm add react-router-dom
+    ```
+  2. 在src下心间router/router.tsx,并写入：
+    ```
+      import { createBrowserRouter, Navigate } from "react-router-dom";
+      import Home from "../view/Home.tsx";
+      import Main from "../view/Main.tsx";
+      import Layout from "../layout/Layout.tsx";
+      import Dashboard from "@/view/Dashboard";
+
+      const router = createBrowserRouter([
+        {
+          path: "/",
+          element: <Layout />,
+          children: [
+            {
+              path: "/",
+              element: <Navigate to={"/dashboard"} />,
+            },
+            {
+              path: "/dashboard",
+              element: <Dashboard />,
+            },
+          ],
+        },
+        {
+          path: "/home",
+          element: <Home />,
+        },
+        {
+          path: "/*",
+          element: <Main />,
+        },
+      ]);
+
+      export default router;
+    ```
+  3. 在main.tsx中引入router
+    ```
+      import React from "react";
+      import ReactDOM from "react-dom/client";
+      import "./index.css";
+      import { RouterProvider } from "react-router-dom";
+      import router from "./router";
+
+      ReactDOM.createRoot(document.getElementById("root")!).render(
+        <React.StrictMode>
+          <RouterProvider router={router} />
+        </React.StrictMode>,
+      );
+    ```
+
+# 配置@
+  1. 在vite.config.ts中添加如下：
+    ```
+      import { defineConfig } from "vite";
+      import react from "@vitejs/plugin-react";
+      import path from "path";
+
+      export default defineConfig({
+        ...
+        resolve: {
+          alias: {
+            "@": path.resolve(__dirname, "./src"),
+          },
+        },
+        ...
+      });
+    ```
+  2. 在tsconfig.json中添加如下：
+    ```
+      {
+        "compilerOptions": {
+          ...
+            "paths": {
+              "@/*": ["./src/*"]
+            },
+        }
+      }
+    ```
 
 # 通过vscode提交git
   1. 输入：git init
