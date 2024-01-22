@@ -108,6 +108,148 @@ cover: /images/vue/vue.jpg                 # 文章的缩略图（用在首页�
       })
       ```
 
+## pinia的使用
+  1. 在src下，新建store/index.ts,并写入
+    ```
+      import userStore from "./modules/user";
+
+      export default function useStore() {
+          return {
+              user: userStore()
+          }
+      }
+    ```
+  2. 在src/store下新建modules/user.ts，并写入
+    ```
+      import { defineStore } from 'pinia'
+
+      const userStore = defineStore('user', {
+        state() {
+          return {
+            count: 0
+          }
+        },
+        actions: {
+          increment() {
+            this.count ++;
+          },
+          decrement() {
+            this.count --;
+          }
+        }
+      })
+
+      export default userStore
+    ```
+  3. 检查在main.ts中引入pinia
+    ```
+      import { createApp } from 'vue'
+      import { createPinia } from 'pinia'
+
+      import App from './App.vue'
+      const app = createApp(App)
+      app.use(createPinia())
+      app.mount('#app')
+    ```
+  4. 使用pinia中的count
+    ```
+      <script setup lang="ts">
+        import useStore from './stores';
+
+        const store = useStore();
+
+        const add = () => {
+          store.user.increment()
+        }
+        const deleteAction = () => {
+          store.user.decrement();
+        }
+      </script>
+
+      <template>
+        <div>
+          {{ store.user.count }}
+          <button @click="add">加</button>
+          <button @click="deleteAction">减</button>
+        </div>
+      </template>
+    ```
+  5. 使用pinia中的storeToRefs进行解构（不能用toRefs,因为会把store里面的所有属性方法都转换成ref）
+    ```
+      <script setup lang="ts">
+      import useStore from './stores';
+      import { storeToRefs } from 'pinia';
+
+      const store = useStore();
+      const { count } = storeToRefs(store.user);
+
+      const add = () => {
+        store.user.increment()
+      }
+
+      const deleteAction = () => {
+        store.user.decrement
+      }
+      </script>
+
+      <template>
+        {{ count }}
+        <button @click="add">加</button>
+        <button @click="deleteAction">减</button>
+      </template>
+    ```
+
+  6. `$subscribe`相当于watch,当值发生变化时触发
+    ```
+      <script setup lang="ts">
+        import useStore from './stores';
+        import { storeToRefs } from 'pinia';
+
+        const store = useStore();
+        const { count } = storeToRefs(store.user);
+
+        store.user.$subscribe((mutate, state)=>{
+          console.log("mutate", mutate, state);
+        })
+
+        const add = () => {
+          store.user.increment()
+        }
+
+        const deleteAction = () => {
+          store.user.decrement
+        }
+      </script>
+
+      <template>
+        {{ count }}
+        <button @click="add">加</button>
+        <button @click="deleteAction">减</button>
+      </template>
+    ```
+
+  7. 组合式API写法
+    * 修改src/store/modules/user.ts
+      ```
+        import { ref } from 'vue'
+        import { defineStore } from 'pinia'
+
+        const userStore = defineStore('counter', () => {
+          const count = ref(0)
+          function increment() {
+            count.value++
+          }
+
+          function decrement() {
+            count.value--
+          }
+
+          return { count, increment, decrement }
+        })
+
+        export default userStore
+      ```
+
 
 # vite的使用
 ## 安装插件
