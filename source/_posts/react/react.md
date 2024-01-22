@@ -921,99 +921,185 @@ cover: /images/react/logo.jpg                 # 文章的缩略图（用在首�
       ```
   3. 在封装的axios中使用
     ```
-      // 默认利用axios的cancelToken进行防重复提交。
-      // 如需允许多个提交同时发出。则需要在请求配置config中增加 neverCancel 属性，并设置为true
-        import { hideLoading, showLoading } from "@/components/loading";
-        import axios from "axios";
-        // import store from '../store/index';
-        // import { getSessionId } from '@/utils/auth';
+      import { hideLoading, showLoading } from "@/components/loading";
+      import { message } from "antd";
+      import axios, { AxiosError } from "axios";
 
-        /* 防止重复提交，利用axios的cancelToken */
-        let pending: any[] = []; // 声明一个数组用于存储每个ajax请求的取消函数和ajax标识
-        const CancelToken: any = axios.CancelToken;
+      const instance = axios.create({
+        // baseURL: "/test",
+        timeout: 8000,
+        timeoutErrorMessage: "请求超时，请稍后再试",
+        withCredentials: true,
+      });
 
-        const removePending: any = (config: any, f: any) => {
-          // 获取请求的url
-          const flagUrl = config.url;
-          // 判断该请求是否在请求队列中
-          if (pending.indexOf(flagUrl) !== -1) {
-            // 如果在请求中，并存在f,f即axios提供的取消函数
-            if (f) {
-              f("取消重复请求"); // 执行取消操作
-            } else {
-              pending.splice(pending.indexOf(flagUrl), 1); // 把这条记录从数组中移除
-            }
-          } else {
-            // 如果不存在在请求队列中，加入队列
-            if (f) {
-              pending.push(flagUrl);
-            }
+      // 请求拦截器
+      instance.interceptors.request.use(
+        (config) => {
+          showLoading();
+          const token = localStorage.getItem("token");
+          if (token) {
+            config.headers.Authorization = "Token:" + token;
           }
-        };
+          return {
+            ...config,
+          };
+        },
+        (error: AxiosError) => {
+          return Promise.reject(error);
+        },
+      );
 
-        /* 创建axios实例 */
-        const service = axios.create({
-          timeout: 5000, // 请求超时时间
-        });
+      // 响应拦截器
+      instance.interceptors.response.use(
+        (response) => {
+          const data = response.data;
+          hideLoading();
+          if (data.code === 500001) {
+            message.error(data.msg);
+          } else if (data.code != 0) {
+            return Promise.reject(data);
+          }
+          return data.data;
+        },
+        (error) => {
+          hideLoading();
+          message.error(error.message);
+          return Promise.reject(error.message);
+        },
+      );
 
-        /* request拦截器 */
-        service.interceptors.request.use(
-          (config: any) => {
-            // neverCancel 配置项，允许多个请求
-            showLoading();
-            if (!config.neverCancel) {
-              // 生成cancelToken
-              config.cancelToken = new CancelToken((c: any) => {
-                removePending(config, c);
-              });
-            }
-            // 在这里可以统一修改请求头，例如 加入 用户 token 等操作
-            //   if (store.getters.sessionId) {
-            //     config.headers['X-SessionId'] = getSessionId(); // 让每个请求携带token--['X-Token']为自定义key
-            //   }
-            return config;
-          },
-          (error: any) => {
-            Promise.reject(error);
-          },
-        );
+      export default {
+        get<T>(url: string, params?: object): Promise<T> {
+          return instance.get(url, { params });
+        },
+        post<T>(url: string, params?: object): Promise<T> {
+          return instance.post(url, params);
+        },
+      };
+    ```
 
-        /* respone拦截器 */
-        service.interceptors.response.use(
-          (response: any) => {
-            hideLoading();
-            // 移除队列中的该请求，注意这时候没有传第二个参数f
-            removePending(response.config);
-            // 获取返回数据，并处理。按自己业务需求修改。下面只是个demo
-            const res = response.data;
-            console.log("res", res);
-            if (res.code !== 200) {
-              if (res.code === 401) {
-                // 返回对应的页面
-                // if (location.hash === '#/') {
-                //   return res;
-                // } else {
-                //   location.href = '/#/';
-                // }
-              }
-              return Promise.reject("error");
-            } else {
-              return response;
-            }
-          },
-          (error: any) => {
-            // 异常处理
-            console.log(error);
-            pending = [];
-            hideLoading();
-            if (error.message === "取消重复请求") {
-              return Promise.reject(error);
-            }
-            return Promise.reject(error);
-          },
-        );
+# 封装localStorage、sessionStorage、cookie
+> 封装cookie需要安装js-cookie和@types/js-cookie
+  1. 安装js-cookie和@types/js-cookie
+    ```
+      yarn add js-cookie
+      yarn add @types/js-cookie -D
 
-        export default service;
+      pnpm add js-cookie
+      pnpm add @types/js-cookie -D
+    ```
+  2. 在utils/storage.ts中写入：
+    ```
+      import Cookies from "js-cookie";
+
+      // localstorage模块封装
+      const getValue = (type: "local" | "session" | "cookie", key: string) => {
+        let value;
+        if (type === "local") {
+          value = localStorage.getItem(key);
+        } else if (type === "session") {
+          value = sessionStorage.getItem(key);
+        }
+
+        if (!value) return "";
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          return value;
+        }
+      };
+
+      export default {
+        local: {
+          set: (key: string, value: any) => {
+            localStorage.setItem(key, JSON.stringify(value));
+          },
+          get: (key: string) => {
+            return getValue("local", key);
+          },
+          remove: (key: string) => {
+            localStorage.removeItem(key);
+          },
+          clear: () => {
+            localStorage.clear();
+          },
+        },
+        session: {
+          set: (key: string, value: any) => {
+            sessionStorage.setItem(key, JSON.stringify(value));
+          },
+          get: (key: string) => {
+            return getValue("session", key);
+          },
+          remove: (key: string) => {
+            sessionStorage.removeItem(key);
+          },
+          clear: () => {
+            sessionStorage.clear();
+          },
+        },
+        cookie: Cookies,
+      };
+    ```
+
+# vite的多环境配置(编译时环境配置)
+  1. 在根路径下创建对应的环境文件，例如：.env.local, .env.sit, .env.production
+    ```
+      # 环境设置
+      NODE_ENV=development
+
+      VITE_API_URL=https://www.fastmock.site/mock/development/f5d8d99de1a8ce59a932ad17a28ed974/temp
+
+    ```
+  2. 打印import.meta.env能够看到所有的值（注意，环境变量必须要是VITE_开头，不然不会生效）
+  3. 在package.json里，添加`--mode`关键词，启动对应的程序，并且要保证在跟路径下有对应的.env文件
+    ```
+      ...
+      "scripts": {
+        ...
+        "dev:development": "vite --mode development",
+        "dev:sit": "vite --mode sit",
+        ...
+      },
+    ```
+
+# vite多环境配置（运行时环境配置-更推荐）
+  1. 在根路径下新建config/index.ts,写入一下代码：
+    ```
+      type ENV = "development" | "sit" | "production";
+
+      const env = (document.documentElement.dataset.env as ENV) || "development";
+
+      const config = {
+        development: {
+          node_env: "development",
+          api_url:
+            "https://www.fastmock.site/mock/development/f5d8d99de1a8ce59a932ad17a28ed974/temp",
+        },
+        sit: {
+          node_env: "sit",
+          api_url:
+            "https://www.fastmock.site/mock/sit/f5d8d99de1a8ce59a932ad17a28ed974/temp",
+        },
+        production: {
+          node_env: "production",
+          api_url:
+            "https://www.fastmock.site/mock/production/f5d8d99de1a8ce59a932ad17a28ed974/temp",
+        },
+      };
+
+      export default {
+        env,
+        ...config[env],
+      };
+    ```
+
+  2. 在index.html的html标签添加`data-env="sit"`
+    ```
+        <!doctype html>
+        <html lang="en" data-env="sit">
+          ...
+        </html>
     ```
 
 # 配置@
