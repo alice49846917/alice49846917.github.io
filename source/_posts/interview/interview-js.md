@@ -494,6 +494,9 @@ cover: https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=955487690,34581
             在验证null时，一定要使用　=== ，因为 == 无法分别 null 和　undefined
             null == undefined // true
             null === undefined // false
+        <6>. Number() 转数字也不同
+            Number(null)是0
+            Number(undefined)是undefined
   ```
 ---
 
@@ -1098,11 +1101,21 @@ abort（）
 ---
 
 # 什么是事件循环？调用堆栈和任务队列之间有什么区别？
-  1. 事件循环: 执行一个宏任务，然后执行清空微任务列表，循环再执行宏任务，再清微任务列表
-    * 微任务: promise / ajax 
-    * 宏任务: setTimout / script / IO
+> 事件循环最主要是分三部分：主线程、宏队列（macrotask）、微队列（microtask）
+> 执行顺序
+  1、先执行主线程
+  2、遇到宏队列（macrotask）放到宏队列（macrotask）
+  3、遇到微队列（microtask）放到微队列（microtask）
+  4、主线程执行完毕
+  5、执行微队列（microtask），微队列（microtask）执行完毕
+  6、执行一次宏队列（macrotask）中的一个任务，执行完毕
+  7、执行微队列（microtask），执行完毕
+  8、依次循环。。。
 
-  2. 堆栈: 先进后出，任务队列: 先进先出
+  * 微任务: promise / ajax 
+  * 宏任务: setTimeout、setInterval、setImmediate、I/O、UI rendering
+
+  1. 堆栈: 先进后出，任务队列: 先进先出
 ---
 
 # 描述一下EventLoop的执行过程
