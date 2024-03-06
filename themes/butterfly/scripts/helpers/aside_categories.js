@@ -24,30 +24,30 @@ hexo.extend.helper.register('aside_categories', function (categories, options) {
   const categoryDir = this.url_for(config.category_dir)
   const limit = options.limit === 0 ? categories.length : options.limit
   const isExpand = options.expand !== 'none'
-  const expandClass = isExpand && options.expand === true ? 'card-category-list-icon expand' : 'card-category-list-icon'
-
+  const expandClass = isExpand && options.expand === true ? 'expand' : ''
   const buttonLabel = this._p('aside.more_button')
   const prepareQuery = (parent) => {
     const query = {}
     if (parent) { query.parent = parent } else { query.parent = { $exists: false } }
     return categories.find(query).sort(orderby, order).filter((cat) => cat.length)
   }
+  let expandBtn = ''
 
   const hierarchicalList = (t, level, parent, topparent = true) => {
     let result = ''
-    var isTopParent = topparent
+    const isTopParent = topparent
     if (t > 0) {
       prepareQuery(parent).forEach((cat, i) => {
         if (t > 0) {
           t = t - 1
           let child
           if (!depth || level + 1 < depth) {
-            var childList = hierarchicalList(t, level + 1, cat._id, false)
+            const childList = hierarchicalList(t, level + 1, cat._id, false)
             child = childList[0]
             t = childList[1]
           }
 
-          var parentClass = isExpand && isTopParent && child ? 'parent' : ''
+          const parentClass = isExpand && isTopParent && child ? 'parent' : ''
 
           result += `<li class="card-category-list-item ${parentClass}">`
 
@@ -60,16 +60,17 @@ hexo.extend.helper.register('aside_categories', function (categories, options) {
           }
 
           if (isExpand && isTopParent && child) {
+            expandBtn = ' expandBtn'
             result += `<i class="fas fa-caret-left ${expandClass}"></i>`
           }
 
           result += '</a>'
 
-          result += '</li>'
-
           if (child) {
             result += `<ul class="card-category-list child">${child}</ul>`
           }
+
+          result += '</li>'
         }
       })
     }
@@ -79,18 +80,20 @@ hexo.extend.helper.register('aside_categories', function (categories, options) {
 
   const list = hierarchicalList(limit, 0)
 
-  var moreButton = function () {
-    var moreHtml = ''
+  const moreButton = function () {
     if (categories.length <= limit) return ''
-    moreHtml += '<li class="card-category-list-item more is-center">'
-    moreHtml += `<a class="card-category-list-link-more" href="${categoryDir}">
-                <span>${buttonLabel}</span><i class="fas fa-angle-right"></i></a></li>`
+    const moreHtml = `<a class="card-more-btn" href="${categoryDir}/" title="${buttonLabel}">
+    <i class="fas fa-angle-right"></i></a>`
 
     return moreHtml
   }
 
-  return `<ul class="card-category-list">
+  return `<div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>${this._p('aside.card_categories')}</span>
+            ${moreButton()}
+            </div>
+            <ul class="card-category-list${expandBtn}" id="aside-cat-list">
             ${list[0]}
-            ${moreButton()}           
             </ul>`
 })
